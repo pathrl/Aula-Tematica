@@ -29,10 +29,14 @@
 			//Ahora quiero dibujar con libertad Lineas
 			context.moveTo(100,100);
 			context.beginPath();
-			context.lineTo(120,100);
-			context.lineTo(120,120);
-			context.lineTo(140,120);
-			context.lineTo(140,140);
+
+			for(var i=0; i<10; i++) {
+				context.lineTo(120+i*20, 100+i*20);
+				context.lineTo(120+i*20, 120+i*20);
+				context.lineTo(140+i*20, 120+i*20);
+				context.lineTo(140+i*20, 140+i*20);
+
+			}
 			context.stroke(); // Dibuja las lineas
 			context.closePath();
 		</script>
