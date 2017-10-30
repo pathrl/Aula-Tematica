@@ -17,6 +17,14 @@
 			//Quiero dibujar un rectangulo rojo
 			context.fillStyle = "red"; //color
 			context.fillRect(10,10,30,30); // rectangulo
+
+			//Quiero dibujar un circulo azul en el centro de la pantalla
+			context.fillStyle = "blue";
+			context.beginPath();
+			context.arc(256, 256, 30, 0, Math.PI*2, true);
+			// context.stroke();
+			context.fill();
+			context.closePath();
 		</script>
 	</body>
 </html>
