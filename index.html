@@ -22,8 +22,18 @@
 			context.fillStyle = "blue";
 			context.beginPath();
 			context.arc(256, 256, 30, 0, Math.PI*2, true);
-			// context.stroke();
-			context.fill();
+			// context.stroke(); // Dibuja el borde
+			context.fill(); // Metodo para rellenar
+			context.closePath();
+
+			//Ahora quiero dibujar con libertad Lineas
+			context.moveTo(100,100);
+			context.beginPath();
+			context.lineTo(120,100);
+			context.lineTo(120,120);
+			context.lineTo(140,120);
+			context.lineTo(140,140);
+			context.stroke(); // Dibuja las lineas
 			context.closePath();
 		</script>
 	</body>
