@@ -21,7 +21,7 @@
 			//Quiero dibujar un circulo azul en el centro de la pantalla
 			context.fillStyle = "blue";
 			context.beginPath();
-			context.arc(256, 256, 30, 0, Math.PI*2, true);
+			context.arc(35, 100, 30, 0, Math.PI*2, true);
 			// context.stroke(); // Dibuja el borde
 			context.fill(); // Metodo para rellenar
 			context.closePath();
@@ -29,16 +29,33 @@
 			//Ahora quiero dibujar con libertad Lineas
 			context.moveTo(100,100);
 			context.beginPath();
-
 			for(var i=0; i<10; i++) {
 				context.lineTo(120+i*20, 100+i*20);
 				context.lineTo(120+i*20, 120+i*20);
 				context.lineTo(140+i*20, 120+i*20);
 				context.lineTo(140+i*20, 140+i*20);
-
 			}
 			context.stroke(); // Dibuja las lineas
 			context.closePath();
+
+			//Comecocos
+			context.fillStyle = "green";
+			context.beginPath();
+
+			context.arc(300, 300, 50, 0.5, Math.PI*1.8, false);
+			context.fill();
+			
+			context.beginPath();
+			context.fillStyle = "white";
+			context.arc(300, 270, 10, 0, Math.PI*2, true);
+			context.fill();
+
+			context.moveTo(400, 200);
+			context.lineTo(300,300);
+			context.lineTo(400,400);
+			context.lineTo(400, 200);
+			context.fill();
+
 		</script>
 	</body>
 </html>
