@@ -1,0 +1,54 @@
+<html>
+	<head>
+		<!--Cosas que pasan en el navegador-->
+	</head>
+	<body>
+		<!--Cosas que pasan realmente en el espacio de trabajo-->
+		<canvas id="newCanvas" height="1000px" width="1000px">	
+		</canvas>
+
+		<script>
+			// Creo una variable y le meto el contenido del lienzo
+			var myCanvas = document.getElementById("newCanvas");
+			
+			// Le asigno un contexto bidimensional
+			var context = myCanvas.getContext("2d");
+			
+			//Emoji
+			context.beginPath();
+			// Circulo
+			context.fillStyle = "yellow";
+			context.arc(500, 500, 100, 0, Math.PI*2, true);
+			context.stroke();
+			context.fill();
+
+			context.beginPath();
+			//Ojos
+			context.fillStyle = "white";
+			context.arc(470, 450, 15, 0, Math.PI*2, true); // I
+			context.arc(530, 450, 15, 0, Math.PI*2, true); // D
+			// context.stroke();
+			context.fill();
+
+			context.beginPath();
+			//Pupulas
+			context.fillStyle = "black";
+			context.arc(470, 450, 5, 0, Math.PI*2, true); // I
+			context.arc(530, 450, 5, 0, Math.PI*2, true); // D
+			// context.stroke();
+			context.fill();
+
+			context.beginPath();
+			//Nariz
+			context.fillStyle = "black";
+			context.arc((480+530)/2, 500, 10, 0,  Math.PI, true);
+			context.rotate(Math.PI / 2);
+			context.stroke();
+			context.fill();
+
+
+
+
+		</script>
+	</body>
+</html>
