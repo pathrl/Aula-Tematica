@@ -1,7 +1,7 @@
 /**
  * Declaracion de condiciones de inicio
  */
-var myCanvas = document.getElementById('fish');
+var myCanvas = document.getElementById('background');
 var context = myCanvas.getContext('2d');
 
 var temp;
@@ -10,27 +10,26 @@ var fishes = new Array;
 var fishImg = new Image();
 fishImg.src = './img/fish.png';
 
-for(i = 0; i<20; i++) {
-    var fish = {
-      img: fishImg,
-      posX: Math.random() * 512,
-      posY: Math.random() * 512,
-      velocity: Math.random() * 10,
-      direction: Math.random() * 100,
-      size: Math.random() * Math.PI * 2,
-    };
-
-    fishes.push(fish);
-  }
-
 initialize();
-
 
 /**
  * @method init  initialize function
  */
 function initialize() {
   temp = setTimeout('update()', 16);
+
+  for(i = 0; i<20; i++) {
+    var fish = {
+      img: fishImg,
+      posX: Math.random() * 512,
+      posY: Math.random() * 512,
+      velocity: Math.random() * 10,
+      size: Math.random() * 100,
+      direction: Math.random() * Math.PI * 2,
+    };
+
+    fishes.push(fish);
+  }
   
   update();
 }
@@ -39,7 +38,8 @@ function initialize() {
  * @method update loop function
  */
 function update() {
-  
+  context.clearRect(0, 0, 512, 512);
+
   for(i=0; i<20; i++) {
     context.drawImage(fishes[i].img, fishes[i].posX, fishes[i].posY, fishes[i].size, fishes[i].size);
     fishes[i].posX += (Math.cos(fishes[i].direction)) * fishes[i].velocity;
