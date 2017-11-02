@@ -47,7 +47,7 @@ function update() {
     fishes[i].direction += (Math.random()-0.5) * 0.1;
 
     checkBordes(fishes[i]);
-    // checkPostion();
+    checkPostion(fish);
     
   }
   
@@ -75,4 +75,12 @@ function checkBordes(fish) {
       fish.posY = 0;
       fish.direction += Math.PI; // Da la vuelta 
     }
+}
+
+/**
+ * @method checkPosition
+ * 
+ */
+function checkPostion() {
+
 }
