@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost/Proyectos/Semana%201/Entrega/presentacion.html",
+      "webRoot": "${workspaceRoot}"
+    }
+  ]
+}

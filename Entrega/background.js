@@ -18,7 +18,7 @@ function initialize() {
   background.onload = function() {
     ctx.drawImage(background, 0, 0, ctx.canvas.width, ctx.canvas.height / 2);
   }
-  background.src = './img/background.jpg';
+  background.src = './img/background.jpg'
 
   background2.onload = function() {
     ctx.drawImage(background2, 0, ctx.canvas.height / 2, ctx.canvas.width, ctx.canvas.height / 2);

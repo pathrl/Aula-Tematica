@@ -97,7 +97,7 @@ function checkBordes(cuadrado) {
       cuadrado.direction += Math.PI;
     } else if (cuadrado.posX < 0) { //DERECHA
       cuadrado.posX = 0;
-      cuadrado.posX += Math.PI;
+      cuadrado.direction += Math.PI;
     }
 
     if (cuadrado.posY > 512) { //ARRIBA
