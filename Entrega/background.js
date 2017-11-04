@@ -1,13 +1,13 @@
 /**
  * Declaracion de condiciones de inicio
  */
-var myCanvas = document.getElementById('carGame');
-var ctx = myCanvas.getContext('2d');
+const myCanvas = document.getElementById('carGame');
+const ctx = myCanvas.getContext('2d');
 ctx.canvas.width = 720;
 ctx.canvas.height = window.innerHeight;
 
-var  background = new Image();
-var  background2 = new Image();
+const background = new Image();
+const background2 = new Image();
 
 initialize();
 
