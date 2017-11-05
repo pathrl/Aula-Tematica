@@ -1,13 +1,12 @@
 /**
  * Declaracion de condiciones de inicio
  */
-const myCanvas = document.getElementById('carGame');
+const myCanvas = document.getElementById('snakeGame');
 const ctx = myCanvas.getContext('2d');
-ctx.canvas.width = 720;
-ctx.canvas.height = window.innerHeight;
+ctx.canvas.width = 1020;
+ctx.canvas.height = 512;
 
 const background = new Image();
-const background2 = new Image();
 
 initialize();
 
@@ -16,12 +15,8 @@ initialize();
  */
 function initialize() {
   background.onload = function() {
-    ctx.drawImage(background, 0, 0, ctx.canvas.width, ctx.canvas.height / 2);
+    ctx.drawImage(background, 6, 6, 500, 500);
   }
-  background.src = './img/background.jpg'
-
-  background2.onload = function() {
-    ctx.drawImage(background2, 0, ctx.canvas.height / 2, ctx.canvas.width, ctx.canvas.height / 2);
-  }
-  background2.src = './img/background2.png';
+  background.src = './img/maze2.png';
+  
 }
