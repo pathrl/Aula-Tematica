@@ -1,0 +1,22 @@
+/**
+ * Declaracion de condiciones de inicio
+ */
+const myCanvas = document.getElementById('snakeGame');
+const ctx = myCanvas.getContext('2d');
+ctx.canvas.width = 512;
+ctx.canvas.height = 512;
+
+const background = new Image();
+
+initialize();
+
+/**
+ * @method init  initialize function
+ */
+function initialize() {
+  background.onload = function() {
+    ctx.drawImage(background, 6, 6, 500, 500);
+  }
+  background.src = './img/maze2.jpg'
+  
+}
