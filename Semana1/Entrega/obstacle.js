@@ -21,7 +21,7 @@ const colors = ["red", "blue", "green", "yellow", "purple", "pink"];
 initialize();
 
 let n = 0;
-let posText = 60;
+let posText = 50;
 window.setInterval(function(){
   n++;
 },1000);
@@ -54,7 +54,7 @@ function update() {
   contextObstacle.clearRect(0, 0, contextObstacle.canvas.width, contextObstacle.canvas.height);
   contextObstacle.fillStyle = "black";
   contextObstacle.fillText(`Cuadrados Totales: ${obstacles.length}`, 530, 20);
-  contextObstacle.fillText(`Cuadrados en el laberitnto: ${obstacles.length}`, 530, 40);
+  contextObstacle.fillText(`Cuadrados en el laberitnto: ${obstacles.length}`, 530, 35);
 
   for (i = 0; i < obstacles.length; i++) {
     const auxX = obstacles[i].posX + (obstacles[i].width / 2) + Math.cos(obstacles[i].dir) * obstacles[i].vel; // Miro hacia donde voy en X
