@@ -5,6 +5,7 @@ const myCanvas = document.getElementById('snakeGame');
 const ctx = myCanvas.getContext('2d');
 ctx.canvas.width = 1020;
 ctx.canvas.height = 512;
+ctx.font = "13px arial";
 
 const background = new Image();
 

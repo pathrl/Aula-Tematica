@@ -16,12 +16,12 @@ const totalObstacles = 7;
 
 const postionsX = [225, 175, 275 , 35, 405, 105, 335];
 const postionsY = [100, 370, 250, 40, 60, 460, 100];
-const colors = ["red", "blue", "green", "yellow", "purple", "pink"];
+const colors = ["red", "blue", "green", "yellow", "purple", "pink", "orange"];
 
 initialize();
 
 let n = 0;
-let posText = 50;
+let posText = 35;
 window.setInterval(function(){
   n++;
 },1000);
@@ -53,7 +53,7 @@ function initialize() {
 function update() {
   contextObstacle.clearRect(0, 0, contextObstacle.canvas.width, contextObstacle.canvas.height);
   contextObstacle.fillStyle = "black";
-  contextObstacle.fillText(`Cuadrados Totales: ${obstacles.length}`, 530, 20);
+  contextObstacle.fillText(`Cuadrados Totales: ${totalObstacles}`, 530, 20);
   contextObstacle.fillText(`Cuadrados en el laberitnto: ${obstacles.length}`, 530, 35);
 
   for (i = 0; i < obstacles.length; i++) {
@@ -65,8 +65,8 @@ function update() {
       obstacles[i].dir += Math.random() * 4 * (Math.PI / 2);
     } else {
       for (j = 0; j < obstacles.length; j++) {
-        if(Math.abs(obstacles[i].posX - obstacles[j].posX) <= 2
-          && Math.abs(obstacles[i].posY - obstacles[j].posY) <= 2
+        if(Math.abs(Math.floor(obstacles[i].posX) - Math.floor(obstacles[j].posX)) <= 2
+          && Math.abs(Math.floor(obstacles[i].posY) - Math.floor(obstacles[j].posY)) <= 2
           &&  i != j) {
             obstacles[i].dir += Math.PI;
             obstacles[j].dir += Math.PI;
@@ -80,7 +80,7 @@ function update() {
     if(obstacles[i].posY < 10 || obstacles[i].posX > 490) {
       obstacles.splice(i, 1);
       posText += 15;
-      contextObstacle.fillText(`Cuadrado: ${i} Tiempo: ${n} segundos`, 530, posText);
+      ctx.fillText(`Cuadrado: ${i} Tiempo: ${n} segundos`, 530, posText);
     } else {
       contextObstacle.fillStyle = obstacles[i].color;
       contextObstacle.fillRect(obstacles[i].posX, obstacles[i].posY, obstacles[i].width, obstacles[i].height);
