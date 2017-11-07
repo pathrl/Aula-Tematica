@@ -1,23 +1,28 @@
 const canvas = document.getElementById('bot');
 const ctx = canvas.getContext('2d');
-const numBots = 10;
+let numBots = 1;
 let bots = new Array();
 
 for(i = 0; i < numBots; i++) {
   let bot = new Bot();
-  bot.posX = Math.random() * 512;
-  bot.posY = Math.random() * 512;
-  bot.velocity = Math.random() * 10;
-  bot.angle = Math.random() * Math.PI * 2;
   bots.push(bot);
 }
-console.log(bots);
 
 var temp = setTimeout('update()', 50);
 
+$('canvas').click(function(event){
+  console.log(event.pageX, event.pageY);
+  let bot = new Bot();
+  bot.posX = event.pageX;
+  bot.posY = event.pageY;
+  bots.push(bot);
+  numBots = bots.length;
+  
+});
+
 function update() {
   ctx.clearRect(0, 0, 512, 512);
-  for( i = 0; i < numBots; i++) {
+  for( i = 0; i < bots.length; i++) {
     bots[i].moveBot();
   }
   clearTimeout(temp);
