@@ -6,6 +6,7 @@ const ctxShip = canvasShip.getContext('2d');
 ctxShip.canvas.width = 720;
 ctxShip.canvas.height = 720;
 
+let shipBot;
 let temp;
 
 initialize();
@@ -14,12 +15,10 @@ initialize();
  * @method init  initialize function
  */
 function initialize() {
-  let shipBot = new Ship();
-  let image = 
-  shipBot.image.onload = function() {
-    ctxShip.drawImage(shipBot.image, shipBot.posX, shipBot.poxY, 80, 80);
-  }
-  shipBot.image.src = './img/ship.png';
+  shipBot = new Ship();
+  shipBot.posX = 300;
+  shipBot.posY = 300;
+  loadImage(ctxShip, shipBot.image, shipBot.posX, shipBot.posY, shipBot.width, shipBot.height, 'img/ship.png');
 
   temp = setTimeout('update()', 18);
   update();
@@ -29,36 +28,32 @@ function initialize() {
 function update() {
 
   clearTimeout(temp);
-  temp = setTimeout('update()', 16);
+  temp = setTimeout('update()', 18);
 }
 
 $(document).keydown(function(e) {
   let angleInDegrees;
   switch(e.which) {
       case 37: // left
-      console.log('l');
-      // $().click(function(){
-        ship.angle-=30;
+        shipBot.moveLeft();
         drawRotated();
-    //  });
-      break;
+        break;
 
       case 39: // right
-      console.log('r');
-      ship.angle-=30;
-      drawRotated();
-      break;
+        shipBot.moveRight();
+        drawRotated();
+        break;
 
       default: return; // exit this handler for other keys
   }
   e.preventDefault();
 });
 
-function drawRotated(){console.log(ship);
-  ctxShip.clearRect(0,0,canvasShip.width,canvasShip.height);
-  ctxShip.save();
-  ctxShip.translate(canvasShip.width/2,canvasShip.height/2);
-  ctxShip.rotate(ship.angle*Math.PI/180);
-  ctxShip.drawImage(ship.image, ship.posX, ship.poxY, 80, 80);
-  ctxShip.restore();
+function drawRotated(){
+  ctxShip.clearRect(0, 0, ctxShip.canvas.width, ctxShip.canvas.height);
+  ctxShip.translate(shipBot.posX, shipBot.posY);
+  ctxShip.rotate(shipBot.angle);
+  ctxShip.drawImage(shipBot.image, -shipBot.width / 2, -shipBot.height / 2, shipBot.width, shipBot.height);
+  ctxShip.rotate(-shipBot.angle);
+  ctxShip.translate(-shipBot.posX, -shipBot.posY);
 }

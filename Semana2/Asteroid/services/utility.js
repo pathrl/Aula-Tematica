@@ -1,6 +1,6 @@
-function loadImage(ctx, image, src, posX, posY, width, heigth) {
+function loadImage(ctx, image, posX, posY, width, heigth, src) {
   image.onload = function(){
-    ctx.drawImage(image, posX, posY, width, height);
+    ctx.drawImage(image, posX, posY, width, heigth);
   }
   image.src = src;
 }
