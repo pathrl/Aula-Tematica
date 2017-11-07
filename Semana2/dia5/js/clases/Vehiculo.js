@@ -1,4 +1,10 @@
-Vehiculo.prototype = new Actor(); //Vehiculo hereda de actor
+Vehiculo.prototype = new Animado(); 
 function Vehiculo() {
+    // Propiedades
+    this.velocidad;
+    this.aceleracion;
+
+    // Metodos
+
 
 }
