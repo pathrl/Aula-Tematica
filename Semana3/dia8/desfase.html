@@ -1,0 +1,48 @@
+<html>
+    <head>
+      <style>
+        canvas{
+          border:1px solid black;
+        }
+      </style>
+    </head>
+    <body>
+      <canvas id="lienzo1" width=512px height=512px>
+      </canvas>
+      <script src="lib/jquery.js"></script>
+      <script>
+          var lienzo = document.getElementById("lienzo1");
+          var contexto = lienzo.getContext("2d");
+          var mapa = new Image();
+          mapa.src = "img/gtamapa.jpg";
+          var coche = new Image();
+          coche.src = "img/coche2.png";
+          var desfaseterrenox = -4096;
+          var desfaseterrenoy = -4096;
+          
+          setTimeout("inicio()",1000)
+          var temporizador;
+          
+          function inicio(){
+              $(document).keydown(function(event){
+                  if(event.which == 65){desfaseterrenox--;}
+                  if(event.which == 68){desfaseterrenox++;}
+                  if(event.which == 87){desfaseterrenoy--;}
+                  if(event.which == 83){desfaseterrenoy++;}
+              })
+              contexto.fillStyle = "red"
+              temporizador = setTimeout("bucle()",1000)
+          }
+          function bucle(){
+             
+              contexto.clearRect(0,0,512,512);
+              contexto.drawImage(mapa,desfaseterrenox,desfaseterrenoy);
+              contexto.drawImage(coche,256,256,16,16);
+              contexto.fillRect(4096+desfaseterrenox,4096+desfaseterrenoy,10,10);
+              clearTimeout(temporizador);
+              temporizador = setTimeout("bucle()",33);
+              
+          }
+      </script>
+    </body>
+  </html>
