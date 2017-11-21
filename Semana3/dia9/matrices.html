@@ -1,0 +1,36 @@
+<html>
+	<head>
+		<style>
+			canvas{
+				border:1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="lienzo1" width=512px height=512px>
+		</canvas>
+		<script>
+		    var lienzo = document.getElementById("lienzo1");
+		    var contexto = lienzo.getContext("2d");
+		
+		    setTimeout("inicio()",1000)
+		    
+		    var bandada = new Array();
+		    bandada[0] = "Hola yo soy un pajaro";
+		    bandada[1] = new Array();
+		    bandada[1][0] = "yo soy un pajaro"
+		    bandada[1][1] = "yo soy otro pajaro"
+		    function inicio(){
+		        console.log(bandada)
+		        temporizador = setTimeout("bucle()",1000)
+		    }
+		    function bucle(){
+		    	contexto.clearRect(0,0,512,512)
+		    
+		        clearTimeout(temporizador);
+		        temporizador = setTimeout("bucle()",33);
+		        
+		    }
+		</script>
+	</body>
+</html>
