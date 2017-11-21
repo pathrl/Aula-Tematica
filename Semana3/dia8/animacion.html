@@ -1,47 +1,58 @@
 <html>
-    <head>
-      <style>
-        canvas{
-          border:1px solid black;
-        }
-      </style>
-    </head>
-    <body>
-      <canvas id="lienzo1" width=512px height=512px>
-      </canvas>
-      <script>
-          var lienzo = document.getElementById("lienzo1");
-          var contexto = lienzo.getContext("2d");
-          var imagen = new Image();
-          imagen.src = "img/sprite.png";
-          setTimeout("inicio()",1000)
-          var temporizador;
-          var x = 0;
-          var y = 0;
-          var cuentavelocidad = 0;
-          function inicio(){
-              
-              temporizador = setTimeout("bucle()",1000)
-          }
-          function bucle(){
-              cuentavelocidad++;
-              contexto.clearRect(0,0,512,512);
-              contexto.drawImage(imagen,x*110,y*151,110,151,0,0,110,151);
-              if(cuentavelocidad % 2 == 0){
-                  x++;
-                  if(x >= 6){ // numero de personajes en una fila en la img
-                      x = 0;
-                      if(y == 0){
-                          y++
-                      }
-                      if(y == 1){ // numero de filas en la img
-                          y--
-                      }
-                  }
-              }
-              clearTimeout(temporizador);
-              temporizador = setTimeout("bucle()",33);  
-          }
-      </script>
-    </body>
-  </html>
+	<head>
+		<style>
+			canvas{
+				border:1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="lienzo1" width=512px height=512px>
+		</canvas>
+		<script>
+		    var lienzo = document.getElementById("lienzo1");
+		    var contexto = lienzo.getContext("2d");
+		    var imagen = new Image();
+		    imagen.src = "img/spritesheet.png";
+		    var paso = new Audio();
+		    paso.src = "sonido/1paso.mp3";
+		    var musica = new Audio();
+		    musica.src = "sonido/musica.mp3";
+		    
+		    setTimeout("inicio()",1000)
+		    var temporizador;
+		    var x = 0;
+		    var y = 0;
+		    var cuentavelocidad = 0;
+		    function inicio(){
+		        musica.volume = 0.2;
+		        paso.volume = 0.5;
+		        //musica.play();
+		        temporizador = setTimeout("bucle()",1000)
+		    }
+		    function bucle(){
+		        //paso.play();
+		        cuentavelocidad++;
+		        contexto.clearRect(0,0,512,512);
+		        contexto.drawImage(imagen,x*110,y*151,110,151,0,0,110,151);
+		        if(cuentavelocidad % 2 == 0){
+    		        x++;
+    		        if(x >= 6){
+    		            paso.pause()
+    		            x = 0;
+    		            if(y == 0){
+    		                y++
+    		            }
+    		            if(y == 1){
+    		                y--
+    		            }
+    		        }
+		        }
+		        
+		        clearTimeout(temporizador);
+		        temporizador = setTimeout("bucle()",33);
+		        
+		    }
+		</script>
+	</body>
+</html>
