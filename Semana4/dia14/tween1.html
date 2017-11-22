@@ -1,0 +1,78 @@
+<html>
+  <head>
+    <style>
+      canvas{
+        border:1px solid black;
+      }
+    
+    </style>
+    <script src="../lib/Tween.js"></script>
+  </head>
+  <body>
+    <canvas id="lienzo1" width=512px height=512px;>
+    </canvas>
+    <script>
+        var lienzo1 = document.getElementById("lienzo1");
+        var contexto1 = lienzo1.getContext("2d");
+        contexto1.beginPath()
+        contexto1.fillStyle = "red";
+        contexto1.arc(30,30,5,0,Math.PI*2,true);
+        contexto1.fill();
+        contexto1.closePath();
+        // Declarar una serie de variables que voy a utilizar
+        var position;
+      var target;
+      var tween, tweenBack;
+      var temp;
+
+      init();
+      // animate();
+
+      function init() {
+        // Definimos un objeto, con propiedades sin metodos
+        position = {pox: 100, poy: 100, rotacion: 0,longaniza:0,radio:0};
+        // El objeto en el que vamos a trabajar
+        target = document.getElementById('target');
+        // Esto es realmente la interpolacion
+        tween = new TWEEN.Tween(position)
+          .to({pox: 400, poy: 400, rotacion: 359,longaniza:100,radio:20}, 8000)
+          .delay(1000)
+          .easing(TWEEN.Easing.Quadratic.InOut)
+          .onUpdate(update);
+
+        /* tweenBack = new TWEEN.Tween(position)
+          .to({x: 100, y: 100, rotation: 0, radio: 20}, 3000)
+          .easing(TWEEN.Easing.Quadratic.InOut)
+          .onUpdate(update);
+        tween.chain(tweenBack);
+        tweenBack.chain(tween); */
+
+        tween.start();
+        bucle();
+
+      }
+
+      //Bucle tween como lo que hacemos 
+      /* function animate( time ) {
+        var id = requestAnimationFrame(animate);
+        var result = TWEEN.update(time);
+        if(!result) cancelAnimationFrame(id);
+      } */
+
+      //Bucle de nosotros
+      function bucle(time) {
+        TWEEN.update(time);
+        clearTimeout(temp);
+        temp = setTimeout('bucle()', 33);
+      }
+
+      function update() {
+        contexto1.beginPath()
+        contexto1.fillStyle = "red";
+        contexto1.arc(position.pox, position.poy, 3, 0, Math.PI*2, true);
+        contexto1.fill();
+        contexto1.closePath();
+      }
+    </script>
+  </body>
+</html>

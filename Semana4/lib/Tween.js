@@ -1,866 +1,912 @@
-/*
-* Tween
-* Visit http://createjs.com/ for documentation, updates and examples.
-*
-* Copyright (c) 2010 gskinner.com, inc.
-*
-* Permission is hereby granted, free of charge, to any person
-* obtaining a copy of this software and associated documentation
-* files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use,
-* copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following
-* conditions:
-*
-* The above copyright notice and this permission notice shall be
-* included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-* OTHER DEALINGS IN THE SOFTWARE.
-*/
-
 /**
- * The TweenJS Javascript library provides a simple but powerful tweening interface. It supports tweening of both
- * numeric object properties & CSS style properties, and allows you to chain tweens and actions together to create
- * complex sequences.
+ * Tween.js - Licensed under the MIT license
+ * https://github.com/tweenjs/tween.js
+ * ----------------------------------------------
  *
- * <h4>Simple Tween</h4>
- * This tween will tween the target's alpha property from 0 to 1 for 1000ms (1 second) then call the <code>handleComplete</code> function.
- *
- *	    target.alpha = 0;
- *	    createjs.Tween.get(target).to({alpha:1}, 1000).call(handleComplete);
- *	    function handleComplete() {
- *	    	//Tween complete
- *	    }
- *
- * <strong>Arguments and Scope</strong>
- * Tween also supports a `call()` with arguments and/or a scope. If no scope is passed, then the function is called
- * anonymously (normal JavaScript behaviour). The scope is useful for maintaining scope when doing object-oriented
- * style development.
- *
- *      createjs.Tween.get(target).to({alpha:0})
- *          .call(handleComplete, [argument1, argument2], this);
- *
- * <h4>Chainable Tween</h4>
- * This tween will wait 0.5s, tween the target's alpha property to 0 over 1s, set it's visible to false, then call the
- * <code>handleComplete</code> function.
- *
- *	    target.alpha = 1;
- *	    createjs.Tween.get(target).wait(500).to({alpha:0, visible:false}, 1000).call(handleComplete);
- *	    function handleComplete() {
- *	    	//Tween complete
- *	    }
- *
- * <h4>Browser Support</h4>
- * TweenJS will work in all browsers.
- *
- * @module TweenJS
- * @main TweenJS
+ * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+ * Thank you all, you're awesome!
  */
 
-// namespace:
-this.createjs = this.createjs||{};
 
-(function() {
-	"use strict";
+var _Group = function () {
+	this._tweens = {};
+	this._tweensAddedDuringUpdate = {};
+};
 
+_Group.prototype = {
+	getAll: function () {
 
-// constructor
-	/**
-	 * Tweens properties for a single target. Methods can be chained to create complex animation sequences:
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *	createjs.Tween.get(target)
-	 *		.wait(500)
-	 *		.to({alpha:0, visible:false}, 1000)
-	 *		.call(handleComplete);
-	 *
-	 * Multiple tweens can share a target, however if they affect the same properties there could be unexpected
-	 * behaviour. To stop all tweens on an object, use {{#crossLink "Tween/removeTweens"}}{{/crossLink}} or pass `override:true`
-	 * in the props argument.
-	 *
-	 * 	createjs.Tween.get(target, {override:true}).to({x:100});
-	 *
-	 * Subscribe to the {{#crossLink "Tween/change:event"}}{{/crossLink}} event to be notified when the tween position changes.
-	 *
-	 * 	createjs.Tween.get(target, {override:true}).to({x:100}).addEventListener("change", handleChange);
-	 * 	function handleChange(event) {
-	 * 		// The tween changed.
-	 * 	}
-	 *
-	 * See the {{#crossLink "Tween/get"}}{{/crossLink}} method also.
-	 * @class Tween
-	 * @param {Object} target The target object that will have its properties tweened.
-	 * @param {Object} [props] The configuration properties to apply to this instance (ex. `{loop:-1, paused:true}`).
-	 * Supported props are listed below. These props are set on the corresponding instance properties except where
-	 * specified.
-	 * @param {boolean} [props.useTicks=false]  See the {{#crossLink "AbstractTween/useTicks:property"}}{{/crossLink}} property for more information.
-	 * @param {boolean} [props.ignoreGlobalPause=false] See the {{#crossLink "AbstractTween/ignoreGlobalPause:property"}}{{/crossLink}} for more information.
-	 * @param {number|boolean} [props.loop=0] See the {{#crossLink "AbstractTween/loop:property"}}{{/crossLink}} for more information.
-	 * @param {boolean} [props.reversed=false] See the {{#crossLink "AbstractTween/reversed:property"}}{{/crossLink}} for more information.
-	 * @param {boolean} [props.bounce=false] See the {{#crossLink "AbstractTween/bounce:property"}}{{/crossLink}} for more information.
-	 * @param {number} [props.timeScale=1] See the {{#crossLink "AbstractTween/timeScale:property"}}{{/crossLink}} for more information.
-	 * @param {object} [props.pluginData] See the {{#crossLink "Tween/pluginData:property"}}{{/crossLink}} for more information.
-	 * @param {boolean} [props.paused=false] See the {{#crossLink "AbstractTween/paused:property"}}{{/crossLink}} for more information.
-	 * @param {number} [props.position=0] The initial position for this tween. See {{#crossLink "AbstractTween/position:property"}}{{/crossLink}}
-	 * @param {Function} [props.onChange] Adds the specified function as a listener to the {{#crossLink "AbstractTween/change:event"}}{{/crossLink}} event
-	 * @param {Function} [props.onComplete] Adds the specified function as a listener to the {{#crossLink "AbstractTween/complete:event"}}{{/crossLink}} event
-	 * @param {boolean} [props.override=false] Removes all existing tweens for the target when set to `true`.
-	 * </UL>
-	 * @extends AbstractTween
-	 * @constructor
-	 */
-	function Tween(target, props) {
-		this.AbstractTween_constructor(props);
-		
-	// public properties:
-	
-		/**
-		 * Allows you to specify data that will be used by installed plugins. Each plugin uses this differently, but in general
-		 * you specify data by assigning it to a property of `pluginData` with the same name as the plugin.
-		 * Note that in many cases, this data is used as soon as the plugin initializes itself for the tween.
-		 * As such, this data should be set before the first `to` call in most cases.
-		 * @example
-		 *	myTween.pluginData.SmartRotation = data;
-		 * 
-		 * Most plugins also support a property to disable them for a specific tween. This is typically the plugin name followed by "_disabled".
-		 * @example
-		 *	myTween.pluginData.SmartRotation_disabled = true;
-		 * 
-		 * Some plugins also store working data in this object, usually in a property named `_PluginClassName`.
-		 * See the documentation for individual plugins for more details.
-		 * @property pluginData
-		 * @type {Object}
-		 */
-		this.pluginData = null;
-	
-		/**
-		 * The target of this tween. This is the object on which the tweened properties will be changed.
-		 * @property target
-		 * @type {Object}
-		 * @readonly
-		 */
-		this.target = target;
-	
-		/**
-		 * Indicates the tween's current position is within a passive wait.
-		 * @property passive
-		 * @type {Boolean}
-		 * @default false
-		 * @readonly
-		 **/
-		this.passive = false;
-		
-		
-	// private properties:
-	
-		/**
-		 * @property _stepHead
-		 * @type {TweenStep}
-		 * @protected
-		 */
-		this._stepHead = new TweenStep(null, 0, 0, {}, null, true);
-		
-		/**
-		 * @property _stepTail
-		 * @type {TweenStep}
-		 * @protected
-		 */
-		this._stepTail = this._stepHead;
-		
-		/**
-		 * The position within the current step. Used by MovieClip.
-		 * @property _stepPosition
-		 * @type {Number}
-		 * @default 0
-		 * @protected
-		 */
-		this._stepPosition = 0;
-		
-		/**
-		 * @property _actionHead
-		 * @type {TweenAction}
-		 * @protected
-		 */
-		this._actionHead = null;
-		
-		/**
-		 * @property _actionTail
-		 * @type {TweenAction}
-		 * @protected
-		 */
-		this._actionTail = null;
-		
-		/**
-		 * Plugins added to this tween instance.
-		 * @property _plugins
-		 * @type Array[Object]
-		 * @default null
-		 * @protected
-		 */
-		this._plugins = null;
-		
-		/**
-		 * Hash for quickly looking up added plugins. Null until a plugin is added.
-		 * @property _plugins
-		 * @type Object
-		 * @default null
-		 * @protected
-		 */
-		this._pluginIds = null;
-		
-		/**
-		 * Used by plugins to inject new properties.
-		 * @property _injected
-		 * @type {Object}
-		 * @default null
-		 * @protected
-		 */
-		this._injected = null;
+		return Object.keys(this._tweens).map(function (tweenId) {
+			return this._tweens[tweenId];
+		}.bind(this));
 
-		if (props) {
-			this.pluginData = props.pluginData;
-			if (props.override) { Tween.removeTweens(target); }
-		}
-		if (!this.pluginData) { this.pluginData = {}; }
-		
-		this._init(props);
-	};
+	},
 
-	var p = createjs.extend(Tween, createjs.AbstractTween);
+	removeAll: function () {
 
-// static properties
+		this._tweens = {};
 
-	/**
-	 * Constant returned by plugins to tell the tween not to use default assignment.
-	 * @property IGNORE
-	 * @type Object
-	 * @static
-	 */
-	Tween.IGNORE = {};
+	},
 
-	/**
-	 * @property _listeners
-	 * @type Array[Tween]
-	 * @static
-	 * @protected
-	 */
-	Tween._tweens = [];
+	add: function (tween) {
 
-	/**
-	 * @property _plugins
-	 * @type Object
-	 * @static
-	 * @protected
-	 */
-	Tween._plugins = null;
-	
-	/**
-	 * @property _tweenHead
-	 * @type Tween
-	 * @static
-	 * @protected
-	 */
-	Tween._tweenHead = null;
-	
-	/**
-	 * @property _tweenTail
-	 * @type Tween
-	 * @static
-	 * @protected
-	 */
-	Tween._tweenTail = null;
+		this._tweens[tween.getId()] = tween;
+		this._tweensAddedDuringUpdate[tween.getId()] = tween;
 
+	},
 
-// static methods	
-	/**
-	 * Returns a new tween instance. This is functionally identical to using `new Tween(...)`, but may look cleaner
-	 * with the chained syntax of TweenJS.
-	 * <h4>Example</h4>
-	 *
-	 *	var tween = createjs.Tween.get(target).to({x:100}, 500);
-	 *	// equivalent to:
-	 *	var tween = new createjs.Tween(target).to({x:100}, 500);
-	 *
-	 * @method get
-	 * @param {Object} target The target object that will have its properties tweened.
-	 * @param {Object} [props] The configuration properties to apply to this instance (ex. `{loop:-1, paused:true}`).
-	 * Supported props are listed below. These props are set on the corresponding instance properties except where
-	 * specified.
-	 * @param {boolean} [props.useTicks=false]  See the {{#crossLink "AbstractTween/useTicks:property"}}{{/crossLink}} property for more information.
-	 * @param {boolean} [props.ignoreGlobalPause=false] See the {{#crossLink "AbstractTween/ignoreGlobalPause:property"}}{{/crossLink}} for more information.
-	 * @param {number|boolean} [props.loop=0] See the {{#crossLink "AbstractTween/loop:property"}}{{/crossLink}} for more information.
-	 * @param {boolean} [props.reversed=false] See the {{#crossLink "AbstractTween/reversed:property"}}{{/crossLink}} for more information.
-	 * @param {boolean} [props.bounce=false] See the {{#crossLink "AbstractTween/bounce:property"}}{{/crossLink}} for more information.
-	 * @param {number} [props.timeScale=1] See the {{#crossLink "AbstractTween/timeScale:property"}}{{/crossLink}} for more information.
-	 * @param {object} [props.pluginData] See the {{#crossLink "Tween/pluginData:property"}}{{/crossLink}} for more information.
-	 * @param {boolean} [props.paused=false] See the {{#crossLink "AbstractTween/paused:property"}}{{/crossLink}} for more information.
-	 * @param {number} [props.position=0] The initial position for this tween. See {{#crossLink "AbstractTween/position:property"}}{{/crossLink}}
-	 * @param {Function} [props.onChange] Adds the specified function as a listener to the {{#crossLink "AbstractTween/change:event"}}{{/crossLink}} event
-	 * @param {Function} [props.onComplete] Adds the specified function as a listener to the {{#crossLink "AbstractTween/complete:event"}}{{/crossLink}} event
-	 * @param {boolean} [props.override=false] Removes all existing tweens for the target when set to `true`.
-	 * @return {Tween} A reference to the created tween.
-	 * @static
-	 */
-	Tween.get = function(target, props) {
-		return new Tween(target, props);
-	};
+	remove: function (tween) {
 
-	/**
-	 * Advances all tweens. This typically uses the {{#crossLink "Ticker"}}{{/crossLink}} class, but you can call it
-	 * manually if you prefer to use your own "heartbeat" implementation.
-	 * @method tick
-	 * @param {Number} delta The change in time in milliseconds since the last tick. Required unless all tweens have
-	 * `useTicks` set to true.
-	 * @param {Boolean} paused Indicates whether a global pause is in effect. Tweens with {{#crossLink "Tween/ignoreGlobalPause:property"}}{{/crossLink}}
-	 * will ignore this, but all others will pause if this is `true`.
-	 * @static
-	 */
-	Tween.tick = function(delta, paused) {
-		var tween = Tween._tweenHead;
-		while (tween) {
-			var next = tween._next; // in case it completes and wipes its _next property
-			if ((paused && !tween.ignoreGlobalPause) || tween._paused) { /* paused */ }
-			else { tween.advance(tween.useTicks?1:delta); }
-			tween = next;
-		}
-	};
+		delete this._tweens[tween.getId()];
+		delete this._tweensAddedDuringUpdate[tween.getId()];
 
-	/**
-	 * Handle events that result from Tween being used as an event handler. This is included to allow Tween to handle
-	 * {{#crossLink "Ticker/tick:event"}}{{/crossLink}} events from the createjs {{#crossLink "Ticker"}}{{/crossLink}}.
-	 * No other events are handled in Tween.
-	 * @method handleEvent
-	 * @param {Object} event An event object passed in by the {{#crossLink "EventDispatcher"}}{{/crossLink}}. Will
-	 * usually be of type "tick".
-	 * @private
-	 * @static
-	 * @since 0.4.2
-	 */
-	Tween.handleEvent = function(event) {
-		if (event.type === "tick") {
-			this.tick(event.delta, event.paused);
-		}
-	};
+	},
 
-	/**
-	 * Removes all existing tweens for a target. This is called automatically by new tweens if the `override`
-	 * property is `true`.
-	 * @method removeTweens
-	 * @param {Object} target The target object to remove existing tweens from.
-	 * @static
-	 */
-	Tween.removeTweens = function(target) {
-		if (!target.tweenjs_count) { return; }
-		var tween = Tween._tweenHead;
-		while (tween) {
-			var next = tween._next;
-			if (tween.target === target) { Tween._register(tween, true); }
-			tween = next;
-		}
-		target.tweenjs_count = 0;
-	};
+	update: function (time, preserve) {
 
-	/**
-	 * Stop and remove all existing tweens.
-	 * @method removeAllTweens
-	 * @static
-	 * @since 0.4.1
-	 */
-	Tween.removeAllTweens = function() {
-		var tween = Tween._tweenHead;
-		while (tween) {
-			var next = tween._next;
-			tween._paused = true;
-			tween.target&&(tween.target.tweenjs_count = 0);
-			tween._next = tween._prev = null;
-			tween = next;
-		}
-		Tween._tweenHead = Tween._tweenTail = null;
-	};
+		var tweenIds = Object.keys(this._tweens);
 
-	/**
-	 * Indicates whether there are any active tweens on the target object (if specified) or in general.
-	 * @method hasActiveTweens
-	 * @param {Object} [target] The target to check for active tweens. If not specified, the return value will indicate
-	 * if there are any active tweens on any target.
-	 * @return {Boolean} Indicates if there are active tweens.
-	 * @static
-	 */
-	Tween.hasActiveTweens = function(target) {
-		if (target) { return !!target.tweenjs_count; }
-		return !!Tween._tweenHead;
-	};
-
-	/**
-	 * Installs a plugin, which can modify how certain properties are handled when tweened. See the {{#crossLink "SamplePlugin"}}{{/crossLink}}
-	 * for an example of how to write TweenJS plugins. Plugins should generally be installed via their own `install` method, in order to provide
-	 * the plugin with an opportunity to configure itself.
-	 * @method _installPlugin
-	 * @param {Object} plugin The plugin to install
-	 * @static
-	 * @protected
-	 */
-	Tween._installPlugin = function(plugin) {
-		var priority = (plugin.priority = plugin.priority||0), arr = (Tween._plugins = Tween._plugins || []);
-		for (var i=0,l=arr.length;i<l;i++) {
-			if (priority < arr[i].priority) { break; }
-		}
-		arr.splice(i,0,plugin);
-	};
-
-	/**
-	 * Registers or unregisters a tween with the ticking system.
-	 * @method _register
-	 * @param {Tween} tween The tween instance to register or unregister.
-	 * @param {Boolean} paused If `false`, the tween is registered. If `true` the tween is unregistered.
-	 * @static
-	 * @protected
-	 */
-	Tween._register = function(tween, paused) {
-		var target = tween.target;
-		if (!paused && tween._paused) {
-			// TODO: this approach might fail if a dev is using sealed objects
-			if (target) { target.tweenjs_count = target.tweenjs_count ? target.tweenjs_count+1 : 1; }
-			var tail = Tween._tweenTail;
-			if (!tail) { Tween._tweenHead = Tween._tweenTail = tween; }
-			else {
-				Tween._tweenTail = tail._next = tween;
-				tween._prev = tail;
-			}
-			if (!Tween._inited && createjs.Ticker) { createjs.Ticker.addEventListener("tick", Tween); Tween._inited = true; }
-		} else if (paused && !tween._paused) {
-			if (target) { target.tweenjs_count--; }
-			var next = tween._next, prev = tween._prev;
-			
-			if (next) { next._prev = prev; }
-			else { Tween._tweenTail = prev; } // was tail
-			if (prev) { prev._next = next; }
-			else { Tween._tweenHead = next; } // was head.
-			
-			tween._next = tween._prev = null;
-		}
-		tween._paused = paused;
-	};
-
-
-// events:
-
-// public methods:
-	/**
-	 * Adds a wait (essentially an empty tween).
-	 * <h4>Example</h4>
-	 *
-	 *	//This tween will wait 1s before alpha is faded to 0.
-	 *	createjs.Tween.get(target).wait(1000).to({alpha:0}, 1000);
-	 *
-	 * @method wait
-	 * @param {Number} duration The duration of the wait in milliseconds (or in ticks if `useTicks` is true).
-	 * @param {Boolean} [passive=false] Tween properties will not be updated during a passive wait. This
-	 * is mostly useful for use with {{#crossLink "Timeline"}}{{/crossLink}} instances that contain multiple tweens
-	 * affecting the same target at different times.
-	 * @return {Tween} This tween instance (for chaining calls).
-	 * @chainable
-	 **/
-	p.wait = function(duration, passive) {
-		if (duration > 0) { this._addStep(+duration, this._stepTail.props, null, passive); }
-		return this;
-	};
-
-	/**
-	 * Adds a tween from the current values to the specified properties. Set duration to 0 to jump to these value.
-	 * Numeric properties will be tweened from their current value in the tween to the target value. Non-numeric
-	 * properties will be set at the end of the specified duration.
-	 * <h4>Example</h4>
-	 *
-	 *	createjs.Tween.get(target).to({alpha:0, visible:false}, 1000);
-	 *
-	 * @method to
-	 * @param {Object} props An object specifying property target values for this tween (Ex. `{x:300}` would tween the x
-	 * property of the target to 300).
-	 * @param {Number} [duration=0] The duration of the tween in milliseconds (or in ticks if `useTicks` is true).
-	 * @param {Function} [ease="linear"] The easing function to use for this tween. See the {{#crossLink "Ease"}}{{/crossLink}}
-	 * class for a list of built-in ease functions.
-	 * @return {Tween} This tween instance (for chaining calls).
-	 * @chainable
-	 */
-	p.to = function(props, duration, ease) {
-		if (duration == null || duration < 0) { duration = 0; }
-		var step = this._addStep(+duration, null, ease);
-		this._appendProps(props, step);
-		return this;
-	};
-	
-	/**
-	 * Adds a label that can be used with {{#crossLink "Tween/gotoAndPlay"}}{{/crossLink}}/{{#crossLink "Tween/gotoAndStop"}}{{/crossLink}}
-	 * at the current point in the tween. For example:
-	 * 
-	 * 	var tween = createjs.Tween.get(foo)
-	 * 					.to({x:100}, 1000)
-	 * 					.label("myLabel")
-	 * 					.to({x:200}, 1000);
-	 * // ...
-	 * tween.gotoAndPlay("myLabel"); // would play from 1000ms in.
-	 * 
-	 * @method label
-	 * @param {String} label The label name.
-	 * @return {Tween} This tween instance (for chaining calls).
-	 * @chainable
-	 **/
-	p.label = function(name) {
-		this.addLabel(name, this.duration);
-		return this;
-	};
-
-	/**
-	 * Adds an action to call the specified function.
-	 * <h4>Example</h4>
-	 *
-	 * 	//would call myFunction() after 1 second.
-	 * 	createjs.Tween.get().wait(1000).call(myFunction);
-	 *
-	 * @method call
-	 * @param {Function} callback The function to call.
-	 * @param {Array} [params]. The parameters to call the function with. If this is omitted, then the function
-	 * will be called with a single param pointing to this tween.
-	 * @param {Object} [scope]. The scope to call the function in. If omitted, it will be called in the target's scope.
-	 * @return {Tween} This tween instance (for chaining calls).
-	 * @chainable
-	 */
-	p.call = function(callback, params, scope) {
-		return this._addAction(scope||this.target, callback, params||[this]);
-	};
-
-	/**
-	 * Adds an action to set the specified props on the specified target. If `target` is null, it will use this tween's
-	 * target. Note that for properties on the target object, you should consider using a zero duration {{#crossLink "Tween/to"}}{{/crossLink}}
-	 * operation instead so the values are registered as tweened props.
-	 * <h4>Example</h4>
-	 *
-	 *	myTween.wait(1000).set({visible:false}, foo);
-	 *
-	 * @method set
-	 * @param {Object} props The properties to set (ex. `{visible:false}`).
-	 * @param {Object} [target] The target to set the properties on. If omitted, they will be set on the tween's target.
-	 * @return {Tween} This tween instance (for chaining calls).
-	 * @chainable
-	 */
-	p.set = function(props, target) {
-		return this._addAction(target||this.target, this._set, [props]);
-	};
-
-	/**
-	 * Adds an action to play (unpause) the specified tween. This enables you to sequence multiple tweens.
-	 * <h4>Example</h4>
-	 *
-	 *	myTween.to({x:100}, 500).play(otherTween);
-	 *
-	 * @method play
-	 * @param {Tween} [tween] The tween to play. Defaults to this tween.
-	 * @return {Tween} This tween instance (for chaining calls).
-	 * @chainable
-	 */
-	p.play = function(tween) {
-		return this._addAction(tween||this, this._set, [{paused:false}]);
-	};
-
-	/**
-	 * Adds an action to pause the specified tween.
-	 * 
-	 * 	myTween.pause(otherTween).to({alpha:1}, 1000).play(otherTween);
-	 * 
-	 * Note that this executes at the end of a tween update, so the tween may advance beyond the time the pause
-	 * action was inserted at. For example:
-	 * 
-	 * myTween.to({foo:0}, 1000).pause().to({foo:1}, 1000);
-	 * 
-	 * At 60fps the tween will advance by ~16ms per tick, if the tween above was at 999ms prior to the current tick, it
-	 * will advance to 1015ms (15ms into the second "step") and then pause.
-	 * 
-	 * @method pause
-	 * @param {Tween} [tween] The tween to pause. Defaults to this tween.
-	 * @return {Tween} This tween instance (for chaining calls)
-	 * @chainable
-	 */
-	p.pause = function(tween) {
-		return this._addAction(tween||this, this._set, [{paused:true}]);
-	};
-
-	// tiny api (primarily for tool output):
-	p.w = p.wait;
-	p.t = p.to;
-	p.c = p.call;
-	p.s = p.set;
-
-	/**
-	 * Returns a string representation of this object.
-	 * @method toString
-	 * @return {String} a string representation of the instance.
-	 */
-	p.toString = function() {
-		return "[Tween]";
-	};
-
-	/**
-	 * @method clone
-	 * @protected
-	 */
-	p.clone = function() {
-		throw("Tween can not be cloned.")
-	};
-
-
-// private methods:
-	/**
-	 * Adds a plugin to this tween.
-	 * @method _addPlugin
-	 * @param {Object} plugin
-	 * @protected
-	 */
-	p._addPlugin = function(plugin) {
-		var ids = this._pluginIds || (this._pluginIds = {}), id = plugin.ID;
-		if (!id || ids[id]) { return; } // already added
-		
-		ids[id] = true;
-		var plugins = this._plugins || (this._plugins = []), priority = plugin.priority || 0;
-		for (var i=0,l=plugins.length; i<l; i++) {
-			if (priority < plugins[i].priority) {
-				plugins.splice(i,0,plugin);
-				return;
-			}
-		}
-		plugins.push(plugin);
-	};
-	
-	// Docced in AbstractTween
-	p._updatePosition = function(jump, end) {
-		var step = this._stepHead.next, t=this.position, d=this.duration;
-		if (this.target && step) {
-			// find our new step index:
-			var stepNext = step.next;
-			while (stepNext && stepNext.t <= t) { step = step.next; stepNext = step.next; }
-			var ratio = end ? d === 0 ? 1 : t/d : (t-step.t)/step.d; // TODO: revisit this.
-			this._updateTargetProps(step, ratio, end);
-		}
-		this._stepPosition = step ? t-step.t : 0;
-	};
-	
-	/**
-	 * @method _updateTargetProps
-	 * @param {Object} step
-	 * @param {Number} ratio
-	 * @param {Boolean} end Indicates to plugins that the full tween has ended.
-	 * @protected
-	 */
-	p._updateTargetProps = function(step, ratio, end) {
-		if (this.passive = !!step.passive) { return; } // don't update props.
-		
-		var v, v0, v1, ease;
-		var p0 = step.prev.props;
-		var p1 = step.props;
-		if (ease = step.ease) { ratio = ease(ratio,0,1,1); }
-		
-		var plugins = this._plugins;
-		proploop : for (var n in p0) {
-			v0 = p0[n];
-			v1 = p1[n];
-			
-			// values are different & it is numeric then interpolate:
-			if (v0 !== v1 && (typeof(v0) === "number")) {
-				v = v0+(v1-v0)*ratio;
-			} else {
-				v = ratio >= 1 ? v1 : v0;
-			}
-			
-			if (plugins) {
-				for (var i=0,l=plugins.length;i<l;i++) {
-					var value = plugins[i].change(this, step, n, v, ratio, end);
-					if (value === Tween.IGNORE) { continue proploop; }
-					if (value !== undefined) { v = value; }
-				}
-			}
-			this.target[n] = v;
+		if (tweenIds.length === 0) {
+			return false;
 		}
 
-	};
-	
-	/**
-	 * @method _runActionsRange
-	 * @param {Number} startPos
-	 * @param {Number} endPos
-	 * @param {Boolean} includeStart
-	 * @protected
-	 */
-	p._runActionsRange = function(startPos, endPos, jump, includeStart) {
-		var rev = startPos > endPos;
-		var action = rev ? this._actionTail : this._actionHead;
-		var ePos = endPos, sPos = startPos;
-		if (rev) { ePos=startPos; sPos=endPos; }
-		var t = this.position;
-		while (action) {
-			var pos = action.t;
-			if (pos === endPos || (pos > sPos && pos < ePos) || (includeStart && pos === startPos)) {
-				action.funct.apply(action.scope, action.params);
-				if (t !== this.position) { return true; }
-			}
-			action = rev ? action.prev : action.next;
-		}
-	};
+		time = time !== undefined ? time : TWEEN.now();
 
-	/**
-	 * @method _appendProps
-	 * @param {Object} props
-	 * @protected
-	 */
-	p._appendProps = function(props, step, stepPlugins) {
-		var initProps = this._stepHead.props, target = this.target, plugins = Tween._plugins;
-		var n, i, value, initValue, inject;
-		var oldStep = step.prev, oldProps = oldStep.props;
-		var stepProps = step.props || (step.props = this._cloneProps(oldProps));
-		var cleanProps = {}; // TODO: is there some way to avoid this additional object?
+		// Tweens are updated in "batches". If you add a new tween during an update, then the
+		// new tween will be updated in the next batch.
+		// If you remove a tween during an update, it may or may not be updated. However,
+		// if the removed tween was added during the current batch, then it will not be updated.
+		while (tweenIds.length > 0) {
+			this._tweensAddedDuringUpdate = {};
 
-		for (n in props) {
-			if (!props.hasOwnProperty(n)) { continue; }
-			cleanProps[n] = stepProps[n] = props[n];
+			for (var i = 0; i < tweenIds.length; i++) {
 
-			if (initProps[n] !== undefined) { continue; }
+				var tween = this._tweens[tweenIds[i]];
 
-			initValue = undefined; // accessing missing properties on DOMElements when using CSSPlugin is INSANELY expensive, so we let the plugin take a first swing at it.
-			if (plugins) {
-				for (i = plugins.length-1; i >= 0; i--) {
-					value = plugins[i].init(this, n, initValue);
-					if (value !== undefined) { initValue = value; }
-					if (initValue === Tween.IGNORE) {
-						delete(stepProps[n]);
-						delete(cleanProps[n]);
-						break;
+				if (tween && tween.update(time) === false) {
+					tween._isPlaying = false;
+
+					if (!preserve) {
+						delete this._tweens[tweenIds[i]];
 					}
 				}
 			}
 
-			if (initValue !== Tween.IGNORE) {
-				if (initValue === undefined) { initValue = target[n]; }
-				oldProps[n] = (initValue === undefined) ? null : initValue;
-			}
+			tweenIds = Object.keys(this._tweensAddedDuringUpdate);
 		}
-		
-		for (n in cleanProps) {
-			value = props[n];
 
-			// propagate old value to previous steps:
-			var o, prev=oldStep;
-			while ((o = prev) && (prev = o.prev)) {
-				if (prev.props === o.props) { continue; } // wait step
-				if (prev.props[n] !== undefined) { break; } // already has a value, we're done.
-				prev.props[n] = oldProps[n];
-			}
-		}
-		
-		if (stepPlugins !== false && (plugins = this._plugins)) {
-			for (i = plugins.length-1; i >= 0; i--) {
-				plugins[i].step(this, step, cleanProps);
-			}
-		}
-		
-		if (inject = this._injected) {
-			this._injected = null;
-			this._appendProps(inject, step, false);
-		}
-	};
-	
-	/**
-	 * Used by plugins to inject properties onto the current step. Called from within `Plugin.step` calls.
-	 * For example, a plugin dealing with color, could read a hex color, and inject red, green, and blue props into the tween.
-	 * See the SamplePlugin for more info.
-	 * @method _injectProp
-	 * @param {String} name
-	 * @param {Object} value
-	 * @protected
-	 */
-	p._injectProp = function(name, value) {
-		var o = this._injected || (this._injected = {});
-		o[name] = value;
-	};
+		return true;
 
-	/**
-	 * @method _addStep
-	 * @param {Number} duration
-	 * @param {Object} props
-	 * @param {Function} ease
-	 * @param {Boolean} passive
-	 * @protected
-	 */
-	p._addStep = function(duration, props, ease, passive) {
-		var step = new TweenStep(this._stepTail, this.duration, duration, props, ease, passive||false);
-		this.duration += duration;
-		return this._stepTail = (this._stepTail.next = step);
-	};
+	}
+};
 
-	/**
-	 * @method _addAction
-	 * @param {Object} scope
-	 * @param {Function} funct
-	 * @param {Array} params
-	 * @protected
-	 */
-	p._addAction = function(scope, funct, params) {
-		var action = new TweenAction(this._actionTail, this.duration, scope, funct, params);
-		if (this._actionTail) { this._actionTail.next = action; }
-		else { this._actionHead = action; }
-		this._actionTail = action;
+var TWEEN = new _Group();
+
+TWEEN.Group = _Group;
+TWEEN._nextId = 0;
+TWEEN.nextId = function () {
+	return TWEEN._nextId++;
+};
+
+
+// Include a performance.now polyfill.
+// In node.js, use process.hrtime.
+if (typeof (window) === 'undefined' && typeof (process) !== 'undefined') {
+	TWEEN.now = function () {
+		var time = process.hrtime();
+
+		// Convert [seconds, nanoseconds] to milliseconds.
+		return time[0] * 1000 + time[1] / 1000000;
+	};
+}
+// In a browser, use window.performance.now if it is available.
+else if (typeof (window) !== 'undefined' &&
+         window.performance !== undefined &&
+		 window.performance.now !== undefined) {
+	// This must be bound, because directly assigning this function
+	// leads to an invocation exception in Chrome.
+	TWEEN.now = window.performance.now.bind(window.performance);
+}
+// Use Date.now if it is available.
+else if (Date.now !== undefined) {
+	TWEEN.now = Date.now;
+}
+// Otherwise, use 'new Date().getTime()'.
+else {
+	TWEEN.now = function () {
+		return new Date().getTime();
+	};
+}
+
+
+TWEEN.Tween = function (object, group) {
+	this._object = object;
+	this._valuesStart = {};
+	this._valuesEnd = {};
+	this._valuesStartRepeat = {};
+	this._duration = 1000;
+	this._repeat = 0;
+	this._repeatDelayTime = undefined;
+	this._yoyo = false;
+	this._isPlaying = false;
+	this._reversed = false;
+	this._delayTime = 0;
+	this._startTime = null;
+	this._easingFunction = TWEEN.Easing.Linear.None;
+	this._interpolationFunction = TWEEN.Interpolation.Linear;
+	this._chainedTweens = [];
+	this._onStartCallback = null;
+	this._onStartCallbackFired = false;
+	this._onUpdateCallback = null;
+	this._onCompleteCallback = null;
+	this._onStopCallback = null;
+	this._group = group || TWEEN;
+	this._id = TWEEN.nextId();
+
+};
+
+TWEEN.Tween.prototype = {
+	getId: function getId() {
+		return this._id;
+	},
+
+	isPlaying: function isPlaying() {
+		return this._isPlaying;
+	},
+
+	to: function to(properties, duration) {
+
+		this._valuesEnd = properties;
+
+		if (duration !== undefined) {
+			this._duration = duration;
+		}
+
 		return this;
-	};
 
-	/**
-	 * @method _set
-	 * @param {Object} props
-	 * @protected
-	 */
-	p._set = function(props) {
-		for (var n in props) {
-			this[n] = props[n];
+	},
+
+	start: function start(time) {
+
+		this._group.add(this);
+
+		this._isPlaying = true;
+
+		this._onStartCallbackFired = false;
+
+		this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
+		this._startTime += this._delayTime;
+
+		for (var property in this._valuesEnd) {
+
+			// Check if an Array was provided as property value
+			if (this._valuesEnd[property] instanceof Array) {
+
+				if (this._valuesEnd[property].length === 0) {
+					continue;
+				}
+
+				// Create a local copy of the Array with the start value at the front
+				this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
+
+			}
+
+			// If `to()` specifies a property that doesn't exist in the source object,
+			// we should not set that property in the object
+			if (this._object[property] === undefined) {
+				continue;
+			}
+
+			// Save the starting value.
+			this._valuesStart[property] = this._object[property];
+
+			if ((this._valuesStart[property] instanceof Array) === false) {
+				this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
+			}
+
+			this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
+
 		}
-	};
 
-	/**
-	 * @method _cloneProps
-	 * @param {Object} props
-	 * @protected
-	 */
-	p._cloneProps = function(props) {
-		var o = {};
-		for (var n in props) { o[n] = props[n]; }
-		return o;
-	};
+		return this;
 
-	createjs.Tween = createjs.promote(Tween, "AbstractTween");
-	
-	function TweenStep(prev, t, d, props, ease, passive) {
-		this.next = null;
-		this.prev = prev;
-		this.t = t;
-		this.d = d;
-		this.props = props;
-		this.ease = ease;
-		this.passive = passive;
-		this.index = prev ? prev.index+1 : 0;
-	};
-	
-	function TweenAction(prev, t, scope, funct, params) {
-		this.next = null;
-		this.prev = prev;
-		this.t = t;
-		this.d = 0;
-		this.scope = scope;
-		this.funct = funct;
-		this.params = params;
-	};
-}());
+	},
+
+	stop: function stop() {
+
+		if (!this._isPlaying) {
+			return this;
+		}
+
+		this._group.remove(this);
+		this._isPlaying = false;
+
+		if (this._onStopCallback !== null) {
+			this._onStopCallback(this._object);
+		}
+
+		this.stopChainedTweens();
+		return this;
+
+	},
+
+	end: function end() {
+
+		this.update(this._startTime + this._duration);
+		return this;
+
+	},
+
+	stopChainedTweens: function stopChainedTweens() {
+
+		for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+			this._chainedTweens[i].stop();
+		}
+
+	},
+
+	delay: function delay(amount) {
+
+		this._delayTime = amount;
+		return this;
+
+	},
+
+	repeat: function repeat(times) {
+
+		this._repeat = times;
+		return this;
+
+	},
+
+	repeatDelay: function repeatDelay(amount) {
+
+		this._repeatDelayTime = amount;
+		return this;
+
+	},
+
+	yoyo: function yoyo(yoyo) {
+
+		this._yoyo = yoyo;
+		return this;
+
+	},
+
+	easing: function easing(easing) {
+
+		this._easingFunction = easing;
+		return this;
+
+	},
+
+	interpolation: function interpolation(interpolation) {
+
+		this._interpolationFunction = interpolation;
+		return this;
+
+	},
+
+	chain: function chain() {
+
+		this._chainedTweens = arguments;
+		return this;
+
+	},
+
+	onStart: function onStart(callback) {
+
+		this._onStartCallback = callback;
+		return this;
+
+	},
+
+	onUpdate: function onUpdate(callback) {
+
+		this._onUpdateCallback = callback;
+		return this;
+
+	},
+
+	onComplete: function onComplete(callback) {
+
+		this._onCompleteCallback = callback;
+		return this;
+
+	},
+
+	onStop: function onStop(callback) {
+
+		this._onStopCallback = callback;
+		return this;
+
+	},
+
+	update: function update(time) {
+
+		var property;
+		var elapsed;
+		var value;
+
+		if (time < this._startTime) {
+			return true;
+		}
+
+		if (this._onStartCallbackFired === false) {
+
+			if (this._onStartCallback !== null) {
+				this._onStartCallback(this._object);
+			}
+
+			this._onStartCallbackFired = true;
+		}
+
+		elapsed = (time - this._startTime) / this._duration;
+		elapsed = elapsed > 1 ? 1 : elapsed;
+
+		value = this._easingFunction(elapsed);
+
+		for (property in this._valuesEnd) {
+
+			// Don't update properties that do not exist in the source object
+			if (this._valuesStart[property] === undefined) {
+				continue;
+			}
+
+			var start = this._valuesStart[property] || 0;
+			var end = this._valuesEnd[property];
+
+			if (end instanceof Array) {
+
+				this._object[property] = this._interpolationFunction(end, value);
+
+			} else {
+
+				// Parses relative end values with start as base (e.g.: +10, -3)
+				if (typeof (end) === 'string') {
+
+					if (end.charAt(0) === '+' || end.charAt(0) === '-') {
+						end = start + parseFloat(end);
+					} else {
+						end = parseFloat(end);
+					}
+				}
+
+				// Protect against non numeric properties.
+				if (typeof (end) === 'number') {
+					this._object[property] = start + (end - start) * value;
+				}
+
+			}
+
+		}
+
+		if (this._onUpdateCallback !== null) {
+			this._onUpdateCallback(this._object);
+		}
+
+		if (elapsed === 1) {
+
+			if (this._repeat > 0) {
+
+				if (isFinite(this._repeat)) {
+					this._repeat--;
+				}
+
+				// Reassign starting values, restart by making startTime = now
+				for (property in this._valuesStartRepeat) {
+
+					if (typeof (this._valuesEnd[property]) === 'string') {
+						this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
+					}
+
+					if (this._yoyo) {
+						var tmp = this._valuesStartRepeat[property];
+
+						this._valuesStartRepeat[property] = this._valuesEnd[property];
+						this._valuesEnd[property] = tmp;
+					}
+
+					this._valuesStart[property] = this._valuesStartRepeat[property];
+
+				}
+
+				if (this._yoyo) {
+					this._reversed = !this._reversed;
+				}
+
+				if (this._repeatDelayTime !== undefined) {
+					this._startTime = time + this._repeatDelayTime;
+				} else {
+					this._startTime = time + this._delayTime;
+				}
+
+				return true;
+
+			} else {
+
+				if (this._onCompleteCallback !== null) {
+
+					this._onCompleteCallback(this._object);
+				}
+
+				for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+					// Make the chained tweens start exactly at the time they should,
+					// even if the `update()` method was called way past the duration of the tween
+					this._chainedTweens[i].start(this._startTime + this._duration);
+				}
+
+				return false;
+
+			}
+
+		}
+
+		return true;
+
+	}
+};
+
+
+TWEEN.Easing = {
+
+	Linear: {
+
+		None: function (k) {
+
+			return k;
+
+		}
+
+	},
+
+	Quadratic: {
+
+		In: function (k) {
+
+			return k * k;
+
+		},
+
+		Out: function (k) {
+
+			return k * (2 - k);
+
+		},
+
+		InOut: function (k) {
+
+			if ((k *= 2) < 1) {
+				return 0.5 * k * k;
+			}
+
+			return - 0.5 * (--k * (k - 2) - 1);
+
+		}
+
+	},
+
+	Cubic: {
+
+		In: function (k) {
+
+			return k * k * k;
+
+		},
+
+		Out: function (k) {
+
+			return --k * k * k + 1;
+
+		},
+
+		InOut: function (k) {
+
+			if ((k *= 2) < 1) {
+				return 0.5 * k * k * k;
+			}
+
+			return 0.5 * ((k -= 2) * k * k + 2);
+
+		}
+
+	},
+
+	Quartic: {
+
+		In: function (k) {
+
+			return k * k * k * k;
+
+		},
+
+		Out: function (k) {
+
+			return 1 - (--k * k * k * k);
+
+		},
+
+		InOut: function (k) {
+
+			if ((k *= 2) < 1) {
+				return 0.5 * k * k * k * k;
+			}
+
+			return - 0.5 * ((k -= 2) * k * k * k - 2);
+
+		}
+
+	},
+
+	Quintic: {
+
+		In: function (k) {
+
+			return k * k * k * k * k;
+
+		},
+
+		Out: function (k) {
+
+			return --k * k * k * k * k + 1;
+
+		},
+
+		InOut: function (k) {
+
+			if ((k *= 2) < 1) {
+				return 0.5 * k * k * k * k * k;
+			}
+
+			return 0.5 * ((k -= 2) * k * k * k * k + 2);
+
+		}
+
+	},
+
+	Sinusoidal: {
+
+		In: function (k) {
+
+			return 1 - Math.cos(k * Math.PI / 2);
+
+		},
+
+		Out: function (k) {
+
+			return Math.sin(k * Math.PI / 2);
+
+		},
+
+		InOut: function (k) {
+
+			return 0.5 * (1 - Math.cos(Math.PI * k));
+
+		}
+
+	},
+
+	Exponential: {
+
+		In: function (k) {
+
+			return k === 0 ? 0 : Math.pow(1024, k - 1);
+
+		},
+
+		Out: function (k) {
+
+			return k === 1 ? 1 : 1 - Math.pow(2, - 10 * k);
+
+		},
+
+		InOut: function (k) {
+
+			if (k === 0) {
+				return 0;
+			}
+
+			if (k === 1) {
+				return 1;
+			}
+
+			if ((k *= 2) < 1) {
+				return 0.5 * Math.pow(1024, k - 1);
+			}
+
+			return 0.5 * (- Math.pow(2, - 10 * (k - 1)) + 2);
+
+		}
+
+	},
+
+	Circular: {
+
+		In: function (k) {
+
+			return 1 - Math.sqrt(1 - k * k);
+
+		},
+
+		Out: function (k) {
+
+			return Math.sqrt(1 - (--k * k));
+
+		},
+
+		InOut: function (k) {
+
+			if ((k *= 2) < 1) {
+				return - 0.5 * (Math.sqrt(1 - k * k) - 1);
+			}
+
+			return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+
+		}
+
+	},
+
+	Elastic: {
+
+		In: function (k) {
+
+			if (k === 0) {
+				return 0;
+			}
+
+			if (k === 1) {
+				return 1;
+			}
+
+			return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+
+		},
+
+		Out: function (k) {
+
+			if (k === 0) {
+				return 0;
+			}
+
+			if (k === 1) {
+				return 1;
+			}
+
+			return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
+
+		},
+
+		InOut: function (k) {
+
+			if (k === 0) {
+				return 0;
+			}
+
+			if (k === 1) {
+				return 1;
+			}
+
+			k *= 2;
+
+			if (k < 1) {
+				return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+			}
+
+			return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
+
+		}
+
+	},
+
+	Back: {
+
+		In: function (k) {
+
+			var s = 1.70158;
+
+			return k * k * ((s + 1) * k - s);
+
+		},
+
+		Out: function (k) {
+
+			var s = 1.70158;
+
+			return --k * k * ((s + 1) * k + s) + 1;
+
+		},
+
+		InOut: function (k) {
+
+			var s = 1.70158 * 1.525;
+
+			if ((k *= 2) < 1) {
+				return 0.5 * (k * k * ((s + 1) * k - s));
+			}
+
+			return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+
+		}
+
+	},
+
+	Bounce: {
+
+		In: function (k) {
+
+			return 1 - TWEEN.Easing.Bounce.Out(1 - k);
+
+		},
+
+		Out: function (k) {
+
+			if (k < (1 / 2.75)) {
+				return 7.5625 * k * k;
+			} else if (k < (2 / 2.75)) {
+				return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
+			} else if (k < (2.5 / 2.75)) {
+				return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
+			} else {
+				return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
+			}
+
+		},
+
+		InOut: function (k) {
+
+			if (k < 0.5) {
+				return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
+			}
+
+			return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+
+		}
+
+	}
+
+};
+
+TWEEN.Interpolation = {
+
+	Linear: function (v, k) {
+
+		var m = v.length - 1;
+		var f = m * k;
+		var i = Math.floor(f);
+		var fn = TWEEN.Interpolation.Utils.Linear;
+
+		if (k < 0) {
+			return fn(v[0], v[1], f);
+		}
+
+		if (k > 1) {
+			return fn(v[m], v[m - 1], m - f);
+		}
+
+		return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+
+	},
+
+	Bezier: function (v, k) {
+
+		var b = 0;
+		var n = v.length - 1;
+		var pw = Math.pow;
+		var bn = TWEEN.Interpolation.Utils.Bernstein;
+
+		for (var i = 0; i <= n; i++) {
+			b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
+		}
+
+		return b;
+
+	},
+
+	CatmullRom: function (v, k) {
+
+		var m = v.length - 1;
+		var f = m * k;
+		var i = Math.floor(f);
+		var fn = TWEEN.Interpolation.Utils.CatmullRom;
+
+		if (v[0] === v[m]) {
+
+			if (k < 0) {
+				i = Math.floor(f = m * (1 + k));
+			}
+
+			return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+
+		} else {
+
+			if (k < 0) {
+				return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+			}
+
+			if (k > 1) {
+				return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+			}
+
+			return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+
+		}
+
+	},
+
+	Utils: {
+
+		Linear: function (p0, p1, t) {
+
+			return (p1 - p0) * t + p0;
+
+		},
+
+		Bernstein: function (n, i) {
+
+			var fc = TWEEN.Interpolation.Utils.Factorial;
+
+			return fc(n) / fc(i) / fc(n - i);
+
+		},
+
+		Factorial: (function () {
+
+			var a = [1];
+
+			return function (n) {
+
+				var s = 1;
+
+				if (a[n]) {
+					return a[n];
+				}
+
+				for (var i = n; i > 1; i--) {
+					s *= i;
+				}
+
+				a[n] = s;
+				return s;
+
+			};
+
+		})(),
+
+		CatmullRom: function (p0, p1, p2, p3, t) {
+
+			var v0 = (p2 - p0) * 0.5;
+			var v1 = (p3 - p1) * 0.5;
+			var t2 = t * t;
+			var t3 = t * t2;
+
+			return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (- 3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+
+		}
+
+	}
+
+};
+
+// UMD (Universal Module Definition)
+(function (root) {
+
+	if (typeof define === 'function' && define.amd) {
+
+		// AMD
+		define([], function () {
+			return TWEEN;
+		});
+
+	} else if (typeof module !== 'undefined' && typeof exports === 'object') {
+
+		// Node.js
+		module.exports = TWEEN;
+
+	} else if (root !== undefined) {
+
+		// Global variable
+		root.TWEEN = TWEEN;
+
+	}
+
+})(this);
