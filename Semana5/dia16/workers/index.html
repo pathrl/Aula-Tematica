@@ -5,7 +5,12 @@
   <body>
     <script>
       var currante1 = new Worker("currante.js");
-      currante1.postMessage("Te envio un mensaje")
+      // Envio un mensaje
+      currante1.postMessage("Te envio un mensaje");
+      //Recibo un mensaje
+     currante1.onmessage(function(){
+        console.log('el worker me ha respondido');
+      });
     </script>
   </body>
 </html>
