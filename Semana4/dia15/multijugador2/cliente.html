@@ -1,0 +1,64 @@
+<html>
+	<head>
+		<style>
+			canvas{
+				border:1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="lienzo1" width=512px height=512px>
+		</canvas>
+		<input type="text" id="usuario" placeholder="introduce tu usuario">
+		<button id="envia">Entrar</button>
+		<div id="ajax"></div>
+		<div id="ajaxvuelve"></div>
+		<script src="../lib/jquery.js"></script>
+		<script>
+		    var lienzo = document.getElementById("lienzo1");
+		    var contexto = lienzo.getContext("2d");
+		   var posx = 200;
+		   var posy = 200;
+		   var nombrejugador = "";
+		    
+		    setTimeout("inicio()",1000)
+		    var temporizador;
+		    
+		    function inicio(){
+		        $(document).keydown(function(event){
+		            if(event.which == 68){posx++;}
+		            if(event.which == 65){posx--;}
+		            if(event.which == 83){posy++;}
+		            if(event.which == 87){posy--;}
+					// Este es el camino de ida
+		            $("#ajax").load("servidor.php?posx="+posx+"&posy="+posy+"&jugador="+nombrejugador);
+		            $("#envia").click(function(){
+		            	nombrejugador = $("#usuario").val();
+		            	temporizador = setTimeout("bucle()",1000)
+		            })
+		        })
+		        //
+		    }
+		    function bucle(){
+		    	contexto.clearRect(0,0,512,512)
+		        // En el camino de vuelta, primero pregunto cuales son las coordenadas del archivo TXT
+				$("#ajaxvuelve").load("servidorvuelve.php")
+				var usuarios = $("#ajaxvuelve").text().split("-")
+				for(i = 0;i<usuarios.length;i++){
+					var nombrenombre = usuarios[i].split(",")[0]
+					var popox = usuarios[i].split(",")[1]
+					var popoy = usuarios[i].split(",")[2]
+					contexto.fillStyle = "red";
+                	contexto.fillRect(popox,popoy,40,40);
+                	contexto.fillText(nombrenombre,popox,popoy);
+				}
+			
+		       
+                
+		        clearTimeout(temporizador);
+		        temporizador = setTimeout("bucle()",1000);
+		        
+		    }
+		</script>
+	</body>
+</html>

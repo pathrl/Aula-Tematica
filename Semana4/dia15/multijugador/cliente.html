@@ -1,0 +1,44 @@
+<html>
+	<head>
+		<style>
+			canvas{
+				border:1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="lienzo1" width=512px height=512px>
+		</canvas>
+		<div id="ajax"></div>
+		<script src="../lib/jquery.js"></script>
+		<script>
+		    var lienzo = document.getElementById("lienzo1");
+		    var contexto = lienzo.getContext("2d");
+		   var posx = 200;
+		   var posy = 200;
+		    
+		    setTimeout("inicio()",1000)
+		    var temporizador;
+		    
+		    function inicio(){
+		        $(document).keydown(function(event){
+		            if(event.which == 68){posx++;}
+		            if(event.which == 65){posx--;}
+		            if(event.which == 83){posy++;}
+		            if(event.which == 87){posy--;}
+		            $("#ajax").load("servidor.php?posx="+posx+"&posy="+posy);
+		        })
+		        temporizador = setTimeout("bucle()",1000)
+		    }
+		    function bucle(){
+		        
+		       contexto.clearRect(0,0,512,512)
+                contexto.fillStyle = "red";
+                contexto.fillRect(posx,posy,40,40);
+		        clearTimeout(temporizador);
+		        temporizador = setTimeout("bucle()",33);
+		        
+		    }
+		</script>
+	</body>
+</html>
