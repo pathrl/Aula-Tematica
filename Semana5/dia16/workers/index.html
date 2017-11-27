@@ -6,11 +6,11 @@
     <script>
       var currante1 = new Worker("currante.js");
       // Envio un mensaje
-      currante1.postMessage("Te envio un mensaje");
+      currante1.postMessage("Hola");
       //Recibo un mensaje
-     currante1.onmessage(function(){
-        console.log('el worker me ha respondido');
-      });
+     currante1.onmessage = function(msg){
+        console.log('el worker me ha respondido el mensaje: ' + msg.data);
+      };
     </script>
   </body>
 </html>
