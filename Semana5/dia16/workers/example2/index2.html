@@ -5,14 +5,14 @@
   <body>
     <script>
       var currantes = new Array();
-      var numeroCurrantes = 10;
-      for(var i = 0; i < numeroCurrantes; i++) {
+      var numeroCurrantes = 1;
+      for(let i = 0; i < numeroCurrantes; i++) {
         currantes[i] = new Worker("currante2.js");
         // Envio un mensaje
         currantes[i].postMessage("Hola");
         //Recibo un mensaje
         currantes[i].onmessage = function(msg){
-          console.log('el worker me ha respondido el mensaje: ' + msg.data);
+          console.log('el worker ' + i + ' me ha respondido el mensaje: ' + msg.data);
         };
       }
     </script>
