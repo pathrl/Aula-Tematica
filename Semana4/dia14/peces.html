@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <style>
+      canvas{
+        border:1px solid black;
+      }
+    
+    </style>
+    <script src="../lib/Tween.js"></script>
+  </head>
+  <body>
+    <canvas id="lienzo1" width=512px height=512px;></canvas>
+    <script>
+      var temporizador;
+      var lienzo1 = document.getElementById("lienzo1");
+      var contexto1 = lienzo1.getContext("2d");
+      var peces = new Array();
+      var inicio = new Array();
+      var final = new Array();
+      var interpolacion = new Array();
+      var numeropeces = 50;
+      contexto1.beginPath()
+      contexto1.fillStyle = "red";
+      contexto1.arc(30,30,5,0,Math.PI*2,true);
+      contexto1.fill();
+      contexto1.closePath();
+      // Declarar una serie de variables que voy a utilizar
+      var position;
+      var target;
+      var tween, tweenBack;
+
+      init();
+      function init() {
+        for(var i =0;i<numeropeces;i++){
+          // Definimos un objeto, con propiedades sin metodos
+          inicio[i] = {pox: Math.random()*512, poy: Math.random()*512};
+          // Esto es realmente la interpolacion
+          interpolacion[i] = new TWEEN.Tween(inicio[i])
+            .to({pox: Math.random()*512, poy: Math.random()*512}, 8000)
+            .delay(1000)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .onUpdate(update);
+          interpolacion[i].start();
+        }
+        bucle();
+      }
+      
+      function bucle(time){
+        TWEEN.update(time);
+        clearTimeout(temporizador)
+        temporizador = setTimeout("bucle()",33)
+          
+      }
+      function update() {
+        contexto1.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        contexto1.fillRect(0,0,512,512);
+        for (var i = 0; i < numeropeces; i++) {
+          contexto1.beginPath();
+          contexto1.fillStyle = "red";
+          contexto1.arc(inicio[i].pox,inicio[i].poy,3,0,Math.PI*2,true);
+          contexto1.fill();
+          contexto1.closePath();
+        }
+      }
+    </script>
+  </body>
+</html>
