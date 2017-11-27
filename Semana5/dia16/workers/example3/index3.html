@@ -36,7 +36,15 @@
           velocidad[i] = Math.round(Math.random() * 10);
 
           currantes[i] = new Worker('currante3.js');
-          currantes[i].postMessage(posX[i] + ',' + posY[i] + ',' + red[i] + ',' + blue[i] + ',' + green[i] + ',' + sizeInicial[i] + ',' + angulo[i] + ',' + velocidad[i]);
+          currantes[i].postMessage(
+            posX[i] + ',' +
+            + posY[i] + ',' +
+            + red[i] + ',' +
+            + blue[i] + ',' +
+            + green[i] + ',' +
+            + sizeInicial[i] + ',' +
+            + angulo[i] + ',' +
+            + velocidad[i]);
           currantes[i].onmessage = function(msg) {
             //contexto1.clearRect(0, 0, 512, 512);
             var datos = msg.data;
