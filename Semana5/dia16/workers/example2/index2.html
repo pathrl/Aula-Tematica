@@ -1,0 +1,20 @@
+<html>
+  <head>
+      
+  </head>
+  <body>
+    <script>
+      var currantes = new Array();
+      var numeroCurrantes = 10;
+      for(var i = 0; i < numeroCurrantes; i++) {
+        currantes[i] = new Worker("currante2.js");
+        // Envio un mensaje
+        currantes[i].postMessage("Hola");
+        //Recibo un mensaje
+        currantes[i].onmessage = function(msg){
+          console.log('el worker me ha respondido el mensaje: ' + msg.data);
+        };
+      }
+    </script>
+  </body>
+</html>
