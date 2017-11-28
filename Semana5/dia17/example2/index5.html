@@ -1,0 +1,98 @@
+<html>
+  <head>
+      <style>
+          canvas{border:1px solid black;background:black;}
+          body,html{margin:0px;padding:0px;overflow:hidden;}
+      </style>
+  </head>
+  <body>
+      <canvas id="lienzo1" width=1920px height=1080px></canvas>
+      <script>
+        var lienzo1  =document.getElementById("lienzo1")
+        var contexto1 = lienzo1.getContext("2d")
+        var semaforo;
+        var numeropuntos = 50;
+        var posx = new Array();
+        var posy = new Array();
+        var r = new Array();
+        var g = new Array();
+        var b = new Array();
+        var angulo = new Array();
+        var velocidad = new Array();
+        var tamanioinicial = new Array();
+        var temporizador;
+        var fps = new Array();
+        var currantes = new Array()
+
+        init();
+        
+        function init() {
+          semaforo = numeropuntos;
+          for(let i = 0;i<numeropuntos;i++) {
+            fps[i] = Math.round(Math.random()*1000)
+            posx[i] = Math.random()*1920;
+            posy[i] = Math.random()*1080;
+            r[i] = Math.round(Math.random()*255)
+            g[i] = Math.round(Math.random()*255)
+            b[i] = Math.round(Math.random()*255)
+            velocidad[i] = Math.round(Math.random()*5)
+            angulo[i] = Math.random()*Math.PI*2
+            tamanioinicial[i] = Math.round(Math.random()*1)
+
+            currantes[i] = new Worker("currante5.js");
+            currantes[i].postMessage(
+              posx[i]+","+
+              +posy[i]+","+
+              +r[i]+","+
+              +g[i]+","+
+              +b[i]+","+
+              +tamanioinicial[i]+","+
+              +angulo[i]+","+
+              +velocidad[i]+","+
+              +fps[i]
+            ); // Le envio un mensaje
+            
+            currantes[i].onmessage = function(e) {// Recibo un mensaje
+              semaforo--
+              console.log(semaforo)
+              if(semaforo == 0){
+                  vuelveadarle()
+              }
+            }
+          }
+        }
+
+        function vuelveadarle(){
+          contexto1.fillStyle = "rgba(0,0,0,0.01)"
+          contexto1.fillRect(0,0,1920,1080)
+          semaforo = 50; //Reiniciar el semaforo que se habia quedado a 0
+          for(let i = 0;i<numeropuntos;i++) {
+              currantes[i].postMessage(posx[i]+","+posy[i]+","+r[i]+","+g[i]+","+b[i]+","+tamanioinicial[i]+","+angulo[i]+","+velocidad[i]+","+fps[i]);// Le envio un mensaje
+              currantes[i].onmessage = function(e){                     // Recibo un mensaje
+              var datos = e.data;
+              var partido = datos.split(",")
+              var damex = partido[0]
+              var damey = partido[1]
+              var damer = partido[2]
+              var dameg = partido[3]
+              var dameb = partido[4]
+              var tamanio = partido[5]
+              
+              contexto1.fillStyle = "rgb("+damer+","+dameg+","+dameb+")"
+              //contexto1.fillRect(damex,damey,tamanio,tamanio)
+              contexto1.beginPath()
+              contexto1.arc(damex,damey,tamanio,0,Math.PI*2,true);
+              contexto1.fill();
+              contexto1.closePath()
+              semaforo--
+              //console.log(semaforo)
+              if(semaforo == 0){
+                  console.log("semaforo a cero")
+                  setTimeout("vuelveadarle()",33)
+              }
+            }
+          }
+        }  
+      </script>
+  </body>
+</html>
