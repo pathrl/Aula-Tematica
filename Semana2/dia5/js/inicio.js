@@ -7,5 +7,5 @@ function inicio() {
   coche1.combustible = 100;
   console.log(coche1.existo());
   temp = setTimeout('bucle()', 50);
-  bucle();
+  update();
 }

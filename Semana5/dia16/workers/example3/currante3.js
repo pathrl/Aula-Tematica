@@ -23,7 +23,7 @@ self.onmessage = function(msg){
 
   temporizador = setTimeout('bucle()',30);
 }
-function bucle(){
+function update(){
   anguloInit += Math.random() * 1;
   velInit += Math.round((Math.random() - 0.5) * 4);
   xInit += Math.cos(anguloInit) * velInit;
