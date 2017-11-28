@@ -1,0 +1,24 @@
+<html>
+  <head>
+      
+  </head>
+  <body>
+    <canvas id="lienzo1" width=991 height=558></canvas>
+    <script>
+      var brad = new Image()
+      brad.src = "brad.jpg";
+      var contexto1 = document.getElementById("lienzo1").getContext("2d")
+      setTimeout("pinta()",1000)
+      function pinta(){
+        contexto1.drawImage(brad,0,0)
+        var datos = contexto1.getImageData(0,0,991,558);
+        for(var i = 0;i<datos.data.length;i+=4){
+            datos.data[i] = 255 - datos.data[i]
+            datos.data[i+1] = 255 - datos.data[i+1]
+            datos.data[i+2] = 255 - datos.data[i+2]
+        }
+        contexto1.putImageData(datos,0,0)
+      }
+    </script>
+  </body>
+</html>
