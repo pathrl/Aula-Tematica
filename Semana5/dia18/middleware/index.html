@@ -1,0 +1,46 @@
+<html>
+  <head>
+      <script src="../../../lib/jquery.js"></script>
+  </head>
+  <body>
+    <canvas id="lienzo1" width="512px" height="512px"></canvas>
+    <script>
+      var contexto = document.getElementById('lienzo1').getContext('2d');
+      var circulox = 256;
+      var circuloy = 256;
+      var circuloradio = 10;
+      var estado = false;
+
+      var temp;
+
+      inicio();
+
+      function inicio() {
+        $('canvas').mousemove(function(e) {
+          if (!estado) {
+            circulox = e.pageX;
+            circuloy = e.pageY;
+          } else {
+            circuloradio = e.pageX;
+          }
+        });
+
+        $('canvas').click(function(e) {
+          estado = !estado;
+        });
+
+        temp = setTimeout('bucle()', 1000);
+      }
+
+      function bucle() {
+        contexto.clearRect(0,0,512,512);
+        contexto.beginPath();
+        contexto.arc(circulox, circuloy, circuloradio, 0, Math.PI*2, true);
+        contexto.stroke();
+
+        clearTimeout(temp);
+        temp = setTimeout('bucle()', 1000);
+      }
+    </script>
+  </body>
+</html>
