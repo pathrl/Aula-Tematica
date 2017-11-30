@@ -7,15 +7,43 @@
     <script>
       var brad = new Image()
       brad.src = "brad.jpg";
+
+      var numeronucleos = navigator.hardwareConcurrency;
+      var workers = new Array();
+      
       var contexto1 = document.getElementById("lienzo1").getContext("2d")
+      
       setTimeout("pinta()",1000)
+
       function pinta(){
         contexto1.drawImage(brad,0,0)
         var datos = contexto1.getImageData(0,0,991,558);
-        for(var i = 0;i<datos.data.length;i+=4){
-            datos.data[i] = 255 - datos.data[i]
-            datos.data[i+1] = 255 - datos.data[i+1]
-            datos.data[i+2] = 255 - datos.data[i+2]
+        for(let nucleo = 0; nucleo < numeronucleos; nucleo++) {
+          // console.log(nucleo);
+          //Enviarle a cada worker el cacho que le corresponde
+          var serializado;
+          var cacho = datos.data.length / numeronucleos;
+          for(let i = nucleo * cacho; i < ((nucleo + 1) * cacho); i++ ) {
+            // console.log(i);
+            serializado += datos.data[i]+",";
+          }
+
+          workers[nucleo] = new Worker('currante6.js');
+          workers[nucleo].postMessage(serializado);
+          
+          workers[nucleo].onmessage = function(e) {
+            console.log('hola');
+            var datos = e.data;
+            var partido = datos.split(',');
+
+            for(let i = 0; i < partido.length; i+=4) {
+              var index = (nucleo * cacho) + i;
+              datos.data[index] = partido[i]; // R
+              datos.data[index + 1] = partido[i + 1]; // G
+              datos.data[index + 2] = partido[i + 2]; // B
+
+            }
+          }
         }
         contexto1.putImageData(datos,0,0)
       }
